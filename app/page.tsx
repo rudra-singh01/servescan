@@ -10,10 +10,10 @@ export default function HomePage() {
           <span className="font-display text-2xl font-bold text-brand">ScanServe</span>
           <div className="flex gap-2">
             <Button variant="ghost" asChild>
-              <Link href="/login">Login</Link>
+              <Link href="/login">Log in</Link>
             </Button>
             <Button asChild>
-              <Link href="/signup">Shuru karein — Free</Link>
+              <Link href="/signup">Get started — Free</Link>
             </Button>
           </div>
         </div>
@@ -21,28 +21,40 @@ export default function HomePage() {
 
       <main className="mx-auto max-w-5xl px-4 py-16 text-center">
         <h1 className="font-display text-4xl font-bold tracking-tight text-text-primary sm:text-5xl">
-          QR se digital menu,
+          Digital menus with QR codes,
           <br />
-          <span className="text-brand">10 minute mein ready</span>
+          <span className="text-brand">ready in 10 minutes</span>
         </h1>
         <p className="mx-auto mt-6 max-w-2xl text-lg text-text-muted">
-          Indian restaurants ke liye — koi app download nahi, sirf QR scan karo aur menu dekho.
-          Aap apne phone se menu manage karo.
+          Built for Indian restaurants — no app download for guests, just scan and browse.
+          Manage your full menu from your phone.
         </p>
         <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Button size="lg" asChild>
-            <Link href="/signup">Free account banayein</Link>
+            <Link href="/signup">Create a free account</Link>
           </Button>
           <Button size="lg" variant="outline" asChild>
-            <Link href="/login">Pehle se account hai?</Link>
+            <Link href="/login">Already have an account?</Link>
           </Button>
         </div>
 
         <div className="mt-20 grid gap-8 sm:grid-cols-3">
           {[
-            { icon: Smartphone, title: 'Mobile-first', desc: 'Phone se hi poora menu manage karo' },
-            { icon: QrCode, title: 'Print-ready QR', desc: 'Table par lagane ke liye PDF download' },
-            { icon: Zap, title: '2G par bhi fast', desc: 'Customers ke liye instant menu load' },
+            {
+              icon: Smartphone,
+              title: 'Mobile-first',
+              desc: 'Manage your entire menu from your phone',
+            },
+            {
+              icon: QrCode,
+              title: 'Print-ready QR',
+              desc: 'Download PNGs to print for each table',
+            },
+            {
+              icon: Zap,
+              title: 'Fast on slow networks',
+              desc: 'Guests get an instant menu load, even on 2G',
+            },
           ].map(({ icon: Icon, title, desc }) => (
             <div key={title} className="rounded-xl border border-border bg-surface p-6 text-left">
               <Icon className="h-8 w-8 text-brand" />

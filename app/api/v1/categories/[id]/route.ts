@@ -43,7 +43,7 @@ export const DELETE = withAuth(async (_req, { tenant }, params) => {
 
   if (existingItems.length > 0) {
     throw new ConflictError(
-      'Is category mein items hain — pehle saare items delete karein',
+      'This category has items — delete all items first',
     );
   }
 

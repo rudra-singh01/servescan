@@ -20,7 +20,7 @@ export default function SignupPage() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !email || !password) {
-      toast.error('Naam, email aur password zaroori hain');
+      toast.error('Name, email, and password are required');
       return;
     }
 
@@ -44,7 +44,7 @@ export default function SignupPage() {
 
     if (!authData.user) {
       setLoading(false);
-      toast.error('Account create nahi ho paya — dubara try karein');
+      toast.error('Could not create account — please try again');
       return;
     }
 
@@ -64,10 +64,10 @@ export default function SignupPage() {
         throw new Error(errorData.error?.message ?? errorData.error ?? 'Profile save failed');
       }
 
-      toast.success('Account ban gaya! Email verify karein (agar enabled ho).');
+      toast.success('Account created! Check your email to verify (if required).');
       router.push(`/verify?email=${encodeURIComponent(email)}`);
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Kuch galat ho gaya');
+      toast.error(err instanceof Error ? err.message : 'Something went wrong');
     } finally {
       setLoading(false);
     }
@@ -82,7 +82,7 @@ export default function SignupPage() {
         <CardContent className="space-y-4">
           <form onSubmit={handleSignup} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="name">Naam</Label>
+              <Label htmlFor="name">Name</Label>
               <Input
                 id="name"
                 type="text"
@@ -116,7 +116,7 @@ export default function SignupPage() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Account ban raha hai...' : 'Sign up karein'}
+              {loading ? 'Creating account...' : 'Sign up'}
             </Button>
           </form>
 
@@ -128,7 +128,7 @@ export default function SignupPage() {
           */}
 
           <p className="text-center text-sm text-text-muted">
-            Pehle se account hai?{' '}
+            Already have an account?{' '}
             <Link href="/login" className="text-brand hover:underline">
               Login
             </Link>

@@ -19,7 +19,7 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error('Email aur password daalein');
+      toast.error('Enter your email and password');
       return;
     }
     setLoading(true);
@@ -71,7 +71,7 @@ export default function LoginPage() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Logging in...' : 'Login karein'}
+              {loading ? 'Logging in...' : 'Log in'}
             </Button>
           </form>
 
@@ -83,7 +83,7 @@ export default function LoginPage() {
           */}
 
           <p className="text-center text-sm text-text-muted">
-            Naya account?{' '}
+            New here?{' '}
             <Link href="/signup" className="text-brand hover:underline">
               Sign up
             </Link>

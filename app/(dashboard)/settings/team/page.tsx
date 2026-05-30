@@ -4,7 +4,7 @@ export default function TeamSettingsPage() {
   return (
     <div>
       <h1 className="font-display text-2xl font-bold">Team</h1>
-      <p className="mt-1 text-text-muted">Pro+ plan — staff invite karein (manager / staff roles)</p>
+      <p className="mt-1 text-text-muted">Pro+ plan — invite staff (manager / staff roles)</p>
       <Card className="mt-6 max-w-lg">
         <CardHeader>
           <CardTitle>Invite team member</CardTitle>

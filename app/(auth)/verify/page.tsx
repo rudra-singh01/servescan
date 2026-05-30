@@ -18,46 +18,40 @@ export default function VerifyPage() {
             <CheckCircle className="h-16 w-16 text-success" />
           </div>
           <CardTitle className="font-display text-center text-brand">
-            Verification Email Bhej di gayi
+            Verification email sent
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-3 text-center">
             <Mail className="h-8 w-8 mx-auto text-text-muted" />
-            <p className="text-text-primary font-medium">
-              Apna email check karo
-            </p>
+            <p className="text-text-primary font-medium">Check your email</p>
             {email && (
               <p className="text-sm text-text-muted break-all">
-                Email bhej di gayi: <strong>{email}</strong>
+                We sent a link to: <strong>{email}</strong>
               </p>
             )}
             <p className="text-sm text-text-muted">
-              Email mein ek link hoga. Upar click karo aur account verify karo.
+              Open the email and click the link to verify your account.
             </p>
           </div>
 
           <div className="bg-surface-alt p-4 rounded-lg space-y-2">
-            <p className="text-xs font-medium text-text-muted uppercase">
-              Email nahi mila?
-            </p>
+            <p className="text-xs font-medium text-text-muted uppercase">Didn&apos;t get the email?</p>
             <ul className="text-xs text-text-muted space-y-1 list-disc list-inside">
-              <li>Spam folder mein dekho</li>
-              <li>Kuch minutes wait karo</li>
-              <li>Email address theek hai check karo</li>
+              <li>Check your spam folder</li>
+              <li>Wait a few minutes</li>
+              <li>Confirm the email address is correct</li>
             </ul>
           </div>
 
           <Button asChild className="w-full">
-            <Link href="/login">
-              Login par jayein
-            </Link>
+            <Link href="/login">Go to log in</Link>
           </Button>
 
           <p className="text-center text-xs text-text-muted">
-            Account banane mein help chahiye?{' '}
+            Need to sign up again?{' '}
             <Link href="/signup" className="text-brand hover:underline">
-              Phir se try karo
+              Try again
             </Link>
           </p>
         </CardContent>

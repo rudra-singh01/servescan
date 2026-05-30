@@ -60,7 +60,7 @@ export function MenuEditor({ menuId, categories, plan, onRefresh }: Props) {
   const handlePlanError = async (res: Response) => {
     const err = await res.json();
     if (err.error?.code === 'plan_limit_exceeded') {
-      toast.error(`Plan limit — max ${err.error.max}. Upgrade karein.`, {
+      toast.error(`Plan limit reached (max ${err.error.max}). Upgrade your plan.`, {
         action: { label: 'Billing', onClick: () => (window.location.href = '/settings/billing') },
       });
       return true;
@@ -70,11 +70,11 @@ export function MenuEditor({ menuId, categories, plan, onRefresh }: Props) {
 
   const addCategory = async () => {
     if (!newCategoryName.trim()) {
-      toast.error('Category ka naam likhein');
+      toast.error('Enter a category name');
       return;
     }
     if (categories.length >= limits.categories) {
-      toast.error(`Free plan par max ${limits.categories} categories`);
+      toast.error(`Your plan allows up to ${limits.categories} categories`);
       return;
     }
     setAddingCategory(true);
@@ -85,27 +85,27 @@ export function MenuEditor({ menuId, categories, plan, onRefresh }: Props) {
     });
     setAddingCategory(false);
     if (!res.ok) {
-      if (!(await handlePlanError(res))) toast.error('Category add nahi hui');
+      if (!(await handlePlanError(res))) toast.error('Could not add category');
       return;
     }
     setNewCategoryName('');
-    toast.success('Category add ho gayi');
+    toast.success('Category added');
     onRefresh();
   };
 
   const addItem = async (categoryId: string) => {
     const draft = getDraft(categoryId);
     if (!draft.name.trim() || !draft.price) {
-      toast.error('Item naam aur price zaroori hai');
+      toast.error('Item name and price are required');
       return;
     }
     if (totalItems >= limits.itemsPerMenu) {
-      toast.error(`Is plan par max ${limits.itemsPerMenu} items per menu`);
+      toast.error(`Your plan allows up to ${limits.itemsPerMenu} items per menu`);
       return;
     }
     const price = parseFloat(draft.price);
     if (Number.isNaN(price) || price < 0) {
-      toast.error('Valid price daalein');
+      toast.error('Enter a valid price');
       return;
     }
 
@@ -120,19 +120,19 @@ export function MenuEditor({ menuId, categories, plan, onRefresh }: Props) {
     });
 
     if (!res.ok) {
-      if (!(await handlePlanError(res))) toast.error('Item add nahi hua');
+      if (!(await handlePlanError(res))) toast.error('Could not add item');
       return;
     }
     setDraft(categoryId, { name: '', price: '', isVeg: 'veg' });
-    toast.success('Item add ho gaya');
+    toast.success('Item added');
     onRefresh();
   };
 
   const deleteItem = async (itemId: string) => {
-    if (!confirm('Item delete karein?')) return;
+    if (!confirm('Delete this item?')) return;
     const res = await fetch(`/api/v1/items/${itemId}`, { method: 'DELETE' });
     if (res.ok) {
-      toast.success('Item delete ho gaya');
+      toast.success('Item deleted');
       onRefresh();
     } else {
       toast.error('Delete fail');
@@ -152,7 +152,7 @@ export function MenuEditor({ menuId, categories, plan, onRefresh }: Props) {
   return (
     <div className="space-y-8">
       <p className="text-sm text-text-muted">
-        Template se shuru kiya ho ya blank — kisi bhi category mein items add kar sakte ho.{' '}
+        Whether you started from a template or blank, you can add items to any category.{' '}
         <span className="font-medium text-text-primary">
           {totalItems}/{limits.itemsPerMenu === Infinity ? '∞' : limits.itemsPerMenu} items
         </span>
@@ -163,7 +163,7 @@ export function MenuEditor({ menuId, categories, plan, onRefresh }: Props) {
 
       {/* Add category */}
       <div className="rounded-lg border border-dashed border-border bg-surface-alt p-4">
-        <Label className="text-sm font-medium">Nayi category</Label>
+        <Label className="text-sm font-medium">New category</Label>
         <div className="mt-2 flex flex-col gap-2 sm:flex-row">
           <Input
             placeholder="e.g. Starters, Main Course, Drinks"
@@ -172,14 +172,14 @@ export function MenuEditor({ menuId, categories, plan, onRefresh }: Props) {
           />
           <Button onClick={addCategory} disabled={addingCategory} className="shrink-0">
             <Plus className="h-4 w-4" />
-            Category add
+            Add category
           </Button>
         </div>
       </div>
 
       {categories.length === 0 && (
         <p className="text-center text-text-muted py-8">
-          Pehli category add karein, phir usme items.
+          Add your first category, then add items inside it.
         </p>
       )}
 
@@ -200,7 +200,7 @@ export function MenuEditor({ menuId, categories, plan, onRefresh }: Props) {
                   {allowImages && (
                     <p className="mt-1 flex items-center gap-1 text-xs text-text-muted">
                       <ImageIcon className="h-3 w-3" />
-                      Image upload (jald aa raha hai)
+                      Image upload (coming soon)
                     </p>
                   )}
                 </div>
@@ -224,10 +224,10 @@ export function MenuEditor({ menuId, categories, plan, onRefresh }: Props) {
 
           {/* Add item form */}
           <div className="mt-4 rounded-lg bg-surface-alt p-3 space-y-3">
-            <p className="text-sm font-medium">Item add karein</p>
+            <p className="text-sm font-medium">Add item</p>
             <div className="grid gap-2 sm:grid-cols-2">
               <Input
-                placeholder="Item naam"
+                placeholder="Item name"
                 value={getDraft(cat.id).name}
                 onChange={(e) => setDraft(cat.id, { name: e.target.value })}
               />
@@ -256,7 +256,7 @@ export function MenuEditor({ menuId, categories, plan, onRefresh }: Props) {
             </div>
             <Button size="sm" onClick={() => addItem(cat.id)}>
               <Plus className="h-4 w-4" />
-              Item add
+              Add item
             </Button>
           </div>
         </section>

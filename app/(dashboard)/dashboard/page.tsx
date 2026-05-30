@@ -30,8 +30,8 @@ export default async function DashboardPage() {
 
   return (
     <div className="p-4 md:p-8">
-      <h1 className="font-display text-2xl font-bold">Namaste, {tenant.name}!</h1>
-      <p className="mt-1 text-text-muted">Aaj ka overview</p>
+      <h1 className="font-display text-2xl font-bold">Hello, {tenant.name}!</h1>
+      <p className="mt-1 text-text-muted">Today&apos;s overview</p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-3">
         <Card>
@@ -65,7 +65,7 @@ export default async function DashboardPage() {
         <Button variant="outline" className="h-auto flex-col gap-2 py-6" asChild>
           <Link href="/menu">
             <UtensilsCrossed className="h-6 w-6 text-brand" />
-            Menu edit karein
+            Edit menu
           </Link>
         </Button>
         <Button variant="outline" className="h-auto flex-col gap-2 py-6" asChild>
@@ -77,7 +77,7 @@ export default async function DashboardPage() {
         <Button variant="outline" className="h-auto flex-col gap-2 py-6" asChild>
           <Link href="/analytics">
             <BarChart3 className="h-6 w-6 text-brand" />
-            Analytics dekhein
+            View analytics
           </Link>
         </Button>
       </div>

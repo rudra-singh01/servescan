@@ -1,5 +1,9 @@
+import { getAppUrl } from '@/lib/utils/app-url';
+
 export const APP_NAME = process.env.NEXT_PUBLIC_APP_NAME || 'ScanServe';
-export const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+
+/** Prefer getAppUrl() in server code — this may reflect the build-time public URL. */
+export const APP_URL = getAppUrl();
 
 export const PLANS = ['free', 'starter', 'pro', 'business'] as const;
 export type Plan = (typeof PLANS)[number];

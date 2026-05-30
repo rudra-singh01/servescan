@@ -48,15 +48,15 @@ export default function OnboardingPage() {
   const createTenant = async () => {
     // Validate before submission
     if (!form.name.trim()) {
-      toast.error('Restaurant ka naam likho');
+      toast.error('Enter your restaurant name');
       return;
     }
     if (!isValidPhone()) {
-      toast.error('10-digit mobile number likho jo 6, 7, 8, ya 9 se shuru ho');
+      toast.error('Enter a valid 10-digit mobile number starting with 6, 7, 8, or 9');
       return;
     }
     if (!form.city.trim()) {
-      toast.error('Shehar likho');
+      toast.error('Enter your city');
       return;
     }
 
@@ -74,7 +74,7 @@ export default function OnboardingPage() {
     setLoading(false);
     if (!res.ok) {
       const err = await res.json();
-      const errorMsg = err?.error?.message || 'Kuch galat ho gaya. Phir se try karo';
+      const errorMsg = err?.error?.message || 'Something went wrong. Please try again';
       toast.error(errorMsg);
       return;
     }
@@ -90,7 +90,7 @@ export default function OnboardingPage() {
     });
     setLoading(false);
     if (!res.ok) {
-      toast.error('Menu create nahi ho paya');
+      toast.error('Could not create menu');
       return;
     }
     const { data: menu } = await res.json();
@@ -102,7 +102,7 @@ export default function OnboardingPage() {
     const res = await fetch('/api/v1/qr/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ menuId }),
+      body: JSON.stringify({ menuId, baseUrl: window.location.origin }),
     });
     if (res.ok) {
       const { data } = await res.json();
@@ -132,15 +132,15 @@ export default function OnboardingPage() {
           <CardHeader>
             <CardTitle className="font-display">
               {step === 1 && 'Restaurant details'}
-              {step === 2 && 'Apna pehla menu'}
-              {step === 3 && 'Aapka QR code ready hai!'}
+              {step === 2 && 'Your first menu'}
+              {step === 3 && 'Your QR code is ready!'}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {step === 1 && (
               <>
                 <div className="space-y-2">
-                  <Label>Restaurant ka naam</Label>
+                  <Label>Restaurant name</Label>
                   <Input
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -159,12 +159,12 @@ export default function OnboardingPage() {
                   />
                   <p className={`text-xs ${form.phone && !isValidPhone() ? 'text-error' : 'text-text-muted'}`}>
                     {form.phone && !isValidPhone()
-                      ? '❌ 10-digit number jo 6, 7, 8, ya 9 se shuru ho'
-                      : '✓ 10-digit number jo 6, 7, 8, ya 9 se shuru ho'}
+                      ? 'Invalid — 10 digits starting with 6, 7, 8, or 9'
+                      : 'Valid 10-digit Indian mobile number'}
                   </p>
                 </div>
                 <div className="space-y-2">
-                  <Label>Shehar</Label>
+                  <Label>City</Label>
                   <Input
                     value={form.city}
                     onChange={(e) => setForm({ ...form, city: e.target.value })}
@@ -176,14 +176,14 @@ export default function OnboardingPage() {
                   onClick={createTenant} 
                   disabled={loading || !form.name.trim() || !isValidPhone() || !form.city.trim()}
                 >
-                  Aage badhein
+                  Continue
                 </Button>
               </>
             )}
 
             {step === 2 && (
               <>
-                <p className="text-sm text-text-muted">Template choose karein ya blank se shuru karein</p>
+                <p className="text-sm text-text-muted">Pick a template or start blank</p>
                 <div className="grid grid-cols-2 gap-2">
                   {MENU_TEMPLATES.map((t) => (
                     <button
@@ -199,7 +199,7 @@ export default function OnboardingPage() {
                   ))}
                 </div>
                 <Button className="w-full" onClick={createMenu} disabled={loading}>
-                  Menu banayein
+                  Create menu
                 </Button>
               </>
             )}
@@ -222,16 +222,16 @@ export default function OnboardingPage() {
                   {qrData?.url && (
                     <Button asChild variant="outline">
                       <a
-                        href={`https://wa.me/?text=${encodeURIComponent(`Menu dekhein: ${qrData.url}`)}`}
+                        href={`https://wa.me/?text=${encodeURIComponent(`View our menu: ${qrData.url}`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
-                        WhatsApp par bhejein
+                        Share on WhatsApp
                       </a>
                     </Button>
                   )}
                   <Button className="w-full" onClick={finish}>
-                    Dashboard par jayein
+                    Go to dashboard
                   </Button>
                 </div>
               </>

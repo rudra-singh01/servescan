@@ -28,14 +28,14 @@ export default async function MenuListPage() {
         <Button asChild>
           <Link href="/menu/new">
             <Plus className="h-4 w-4" />
-            Naya menu
+            New menu
           </Link>
         </Button>
       </div>
 
       <div className="mt-6 space-y-3">
         {menus.length === 0 ? (
-          <p className="text-text-muted">Abhi koi menu nahi. Pehla menu banayein!</p>
+          <p className="text-text-muted">No menus yet. Create your first menu!</p>
         ) : (
           menus.map((menu) => (
             <Card key={menu.id}>

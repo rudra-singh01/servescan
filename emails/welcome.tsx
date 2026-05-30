@@ -7,9 +7,9 @@ export function WelcomeEmail({ name }: { name: string }) {
       <Body style={{ fontFamily: 'sans-serif' }}>
         <Container>
           <Heading>Welcome to ScanServe!</Heading>
-          <Text>Namaste {name},</Text>
+          <Text>Hello {name},</Text>
           <Text>
-            Aapka account ready hai. Ab apna digital menu banayein aur QR code download karein.
+            Your account is ready. Create your digital menu and download your QR code.
           </Text>
         </Container>
       </Body>

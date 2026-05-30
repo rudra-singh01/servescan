@@ -55,14 +55,14 @@ export default function MenuEditorPage() {
   const activateMenu = async () => {
     const res = await fetch(`/api/v1/menus/${menuId}/activate`, { method: 'POST' });
     if (res.ok) {
-      toast.success('Menu publish ho gaya — guests ab dekh sakte hain!');
+      toast.success('Menu published — guests can view it now!');
       loadMenu();
     } else {
       const err = await res.json();
       toast.error(
         typeof err.error === 'object' && err.error?.message
           ? err.error.message
-          : 'Pehle kam se kam 1 item add karein',
+          : 'Add at least one item first',
       );
     }
   };

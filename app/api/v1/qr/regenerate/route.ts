@@ -4,12 +4,7 @@ import * as qrService from '@/lib/services/qr.service';
 
 export const runtime = 'nodejs';
 
-export const GET = withAuth(async (_req, { tenant }) => {
-  const codes = await qrService.listQrCodes(tenant.id);
-  return success(codes);
-});
-
-/** Regenerate all QR codes with the current site URL (optional baseUrl from client). */
+/** Rebuild all QR images/URLs for the tenant using the current production URL. */
 export const POST = withAuth(async (req, { tenant }) => {
   let baseUrl: string | undefined;
   try {

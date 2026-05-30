@@ -31,7 +31,7 @@ export function MenuView({ tenant, menu, allUnavailable }: Props) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center p-8 text-center">
         <p className="text-text-muted">
-          Menu items abhi available nahi hain. Kripya staff se poochhein.
+          Menu items are not available right now. Please ask staff for assistance.
         </p>
       </div>
     );

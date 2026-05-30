@@ -48,7 +48,7 @@ export default function OrdersPage() {
 
       <div className="mt-6 space-y-3">
         {orders.length === 0 ? (
-          <p className="text-text-muted">Abhi koi order nahi</p>
+          <p className="text-text-muted">No orders yet</p>
         ) : (
           orders.map((order) => (
             <Card key={order.id}>

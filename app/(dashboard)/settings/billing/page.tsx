@@ -44,7 +44,7 @@ export default function BillingPage() {
     <div className="max-w-5xl">
       <h1 className="font-display text-2xl font-bold">Billing & Plans</h1>
       <p className="mt-1 text-text-muted">
-        Apna plan manage karein — free users 1 menu, 20 items, default images
+        Manage your plan — free includes 1 menu, 20 items, and default images
       </p>
 
       {!loading && (
@@ -118,11 +118,11 @@ export default function BillingPage() {
           <CardTitle className="text-base">Free plan tips</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-text-muted space-y-2">
-          <p>· 1 menu, 3 categories, 20 items — template type se farak nahi padta</p>
-          <p>· Items bina photo ke default image ke saath dikhenge</p>
-          <p>· Zyada menus / photos ke liye Starter ya Pro upgrade karein</p>
+          <p>· 1 menu, 3 categories, 20 items — works with any template</p>
+          <p>· Items use a default image until you upgrade for uploads</p>
+          <p>· Upgrade to Starter or Pro for more menus and photo uploads</p>
           <Button variant="link" className="h-auto p-0 text-brand" asChild>
-            <Link href="/menu">Menu editor kholein</Link>
+            <Link href="/menu">Open menu editor</Link>
           </Button>
         </CardContent>
       </Card>

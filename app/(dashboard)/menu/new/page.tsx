@@ -26,7 +26,7 @@ export default function NewMenuPage() {
       router.push(`/menu/${data.id}`);
     } else {
       const err = await res.json();
-      toast.error(err.error?.code === 'plan_limit_exceeded' ? 'Plan limit — upgrade karein' : 'Create failed');
+      toast.error(err.error?.code === 'plan_limit_exceeded' ? 'Plan limit reached — upgrade' : 'Create failed');
     }
   };
 
@@ -34,7 +34,7 @@ export default function NewMenuPage() {
     <div className="p-4 md:p-8">
       <Card className="max-w-md">
         <CardHeader>
-          <CardTitle>Naya menu</CardTitle>
+          <CardTitle>New menu</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">

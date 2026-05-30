@@ -8,6 +8,8 @@ import { branches } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { ValidationError } from '@/lib/api/errors';
 
+export const runtime = 'nodejs';
+
 export const POST = withAuth(async (req, { tenant }) => {
   const body = await req.json();
   const parsed = qrGenerateSchema.safeParse(body);
@@ -20,6 +22,10 @@ export const POST = withAuth(async (req, { tenant }) => {
     .limit(1);
 
   const plan = await getCachedPlan(tenant.id);
+  const raw = body as { baseUrl?: string };
+  const baseUrl =
+    typeof raw.baseUrl === 'string' && raw.baseUrl.startsWith('http') ? raw.baseUrl : undefined;
+
   const qr = await qrService.generateQr(
     tenant.id,
     tenant.slug,
@@ -30,6 +36,7 @@ export const POST = withAuth(async (req, { tenant }) => {
       tableNumber: parsed.data.tableNumber,
       size: parsed.data.size,
       style: parsed.data.style,
+      baseUrl,
     },
   );
   return success(qr, 201);
