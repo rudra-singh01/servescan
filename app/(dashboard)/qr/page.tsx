@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
+import { useLoading } from '@/components/providers/loading-provider';
+import { usePlan } from '@/components/providers/plan-provider';
 
 type QrRecord = {
   id: string;
@@ -18,48 +20,41 @@ function getSiteOrigin(): string {
   return '';
 }
 
-async function readApiError(res: Response): Promise<string> {
-  try {
-    const body = await res.json();
-    if (typeof body.error === 'string') return body.error;
-    if (body.error?.message && typeof body.error.message === 'string') return body.error.message;
-    if (body.error?.code) return String(body.error.code);
-  } catch {
-    // ignore
-  }
-  return `Request failed (${res.status})`;
-}
-
 export default function QrPage() {
+  const { withLoading } = useLoading();
+  const { planLoading, appFetch, guardNumericLimit, isFree } = usePlan();
   const [qrs, setQrs] = useState<QrRecord[]>([]);
   const [menus, setMenus] = useState<{ id: string; name: string }[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [pageReady, setPageReady] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
   const [generatingMenuId, setGeneratingMenuId] = useState<string | null>(null);
 
-  const loadQrs = async () => {
-    const res = await fetch('/api/v1/qr');
+  const loadQrs = useCallback(async () => {
+    const res = await appFetch('/api/v1/qr', undefined, { loading: false });
     const body = await res.json();
-    if (res.ok) {
-      setQrs(body.data ?? []);
-    }
-  };
+    if (res.ok) setQrs(body.data ?? []);
+  }, [appFetch]);
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
+  const loadPage = useCallback(async () => {
+    await withLoading(async () => {
       await loadQrs();
-      const menusRes = await fetch('/api/v1/menus');
+      const menusRes = await appFetch('/api/v1/menus', undefined, { loading: false });
       const menusBody = await menusRes.json();
       if (menusRes.ok) setMenus(menusBody.data ?? []);
-      setLoading(false);
-    })();
-  }, []);
+      setPageReady(true);
+    }, 'Loading QR codes…');
+  }, [withLoading, loadQrs, appFetch]);
+
+  useEffect(() => {
+    if (!planLoading) loadPage();
+  }, [planLoading, loadPage]);
 
   const generate = async (menuId: string) => {
+    if (guardNumericLimit('qrCodes', qrs.length)) return;
+
     setGeneratingMenuId(menuId);
     try {
-      const res = await fetch('/api/v1/qr/generate', {
+      const res = await appFetch('/api/v1/qr/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ menuId, baseUrl: getSiteOrigin() }),
@@ -68,8 +63,8 @@ export default function QrPage() {
       if (res.ok) {
         setQrs((q) => [body.data, ...q]);
         toast.success('QR code generated');
-      } else {
-        toast.error(await readApiError(res));
+      } else if (res.status !== 402) {
+        toast.error('Could not generate QR code');
       }
     } catch {
       toast.error('Could not generate QR code');
@@ -81,7 +76,7 @@ export default function QrPage() {
   const regenerateAll = async () => {
     setRegenerating(true);
     try {
-      const res = await fetch('/api/v1/qr', {
+      const res = await appFetch('/api/v1/qr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ baseUrl: getSiteOrigin() }),
@@ -89,7 +84,7 @@ export default function QrPage() {
       const body = await res.json();
 
       if (!res.ok) {
-        toast.error(await readApiError(res));
+        if (res.status !== 402) toast.error('Could not regenerate QR codes');
         return;
       }
 
@@ -115,16 +110,23 @@ export default function QrPage() {
     }
   };
 
+  if (planLoading || !pageReady) return null;
+
   const hasLocalhost = qrs.some((q) => q.url?.includes('localhost'));
 
   return (
     <div className="p-4 md:p-8">
       <h1 className="font-display text-2xl font-bold">QR Codes</h1>
-      <p className="mt-1 text-text-muted">Download and print QR codes for your tables</p>
+      <p className="mt-1 text-text-muted">
+        Download and print QR codes for your tables
+        {isFree && (
+          <span className="ml-2 rounded-full bg-brand-light px-2 py-0.5 text-xs text-brand-dark">
+            Free plan: 1 QR code
+          </span>
+        )}
+      </p>
 
-      {loading && <p className="mt-4 text-sm text-text-muted">Loading…</p>}
-
-      {!loading && hasLocalhost && (
+      {hasLocalhost && (
         <div className="mt-4 rounded-lg border border-warning/40 bg-warning/10 p-4 text-sm">
           <p className="font-medium">Some QR codes still point to localhost.</p>
           <p className="mt-1 text-text-muted">
@@ -142,7 +144,7 @@ export default function QrPage() {
         </div>
       )}
 
-      {!loading && qrs.length > 0 && (
+      {qrs.length > 0 && (
         <Button
           className="mt-4"
           variant="outline"
@@ -154,7 +156,7 @@ export default function QrPage() {
         </Button>
       )}
 
-      {!loading && menus.length > 0 && (
+      {menus.length > 0 && (
         <div className="mt-6 flex flex-wrap gap-2">
           {menus.map((m) => (
             <Button
@@ -168,7 +170,7 @@ export default function QrPage() {
         </div>
       )}
 
-      {!loading && qrs.length === 0 && (
+      {qrs.length === 0 && (
         <p className="mt-8 text-center text-text-muted">
           No QR codes yet. Pick a menu above to generate your first one.
         </p>

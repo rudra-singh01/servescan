@@ -13,6 +13,7 @@ import {
   CreditCard,
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
+import { usePlan } from '@/components/providers/plan-provider';
 
 const nav = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -27,11 +28,19 @@ const nav = [
 
 export function DashboardSidebar() {
   const pathname = usePathname();
+  const { isFree, planLoading } = usePlan();
 
   return (
     <>
       <aside className="hidden w-56 shrink-0 border-r border-border bg-surface md:block">
-        <div className="p-4 font-display text-xl font-bold text-brand">ScanServe</div>
+        <div className="flex items-center gap-2 p-4">
+          <span className="font-display text-xl font-bold text-brand">ScanServe</span>
+          {isFree && !planLoading && (
+            <span className="rounded-full bg-brand-light px-2 py-0.5 text-[10px] font-semibold uppercase text-brand-dark">
+              Free
+            </span>
+          )}
+        </div>
         <nav className="space-y-1 px-2">
           {nav.map(({ href, label, icon: Icon }) => (
             <Link

@@ -12,23 +12,42 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
+import { useLoading } from '@/components/providers/loading-provider';
+import { usePlan } from '@/components/providers/plan-provider';
 
 export default function AnalyticsPage() {
+  const { withLoading } = useLoading();
+  const { plan, isFree, planLoading, appFetch } = usePlan();
   const [overview, setOverview] = useState({ scans: 0, orders: 0, revenue: 0 });
   const [series, setSeries] = useState<{ date: string; count: number }[]>([]);
+  const [pageReady, setPageReady] = useState(false);
 
   useEffect(() => {
-    fetch('/api/v1/analytics/overview?days=7')
-      .then((r) => r.json())
-      .then((d) => setOverview(d.data ?? {}));
-    fetch('/api/v1/analytics/scans?days=7')
-      .then((r) => r.json())
-      .then((d) => setSeries(d.data ?? []));
-  }, []);
+    if (planLoading) return;
+
+    withLoading(async () => {
+      const [overviewRes, scansRes] = await Promise.all([
+        appFetch('/api/v1/analytics/overview?days=7', undefined, { loading: false }),
+        appFetch('/api/v1/analytics/scans?days=7', undefined, { loading: false }),
+      ]);
+      const overviewBody = await overviewRes.json();
+      const scansBody = await scansRes.json();
+      if (overviewRes.ok) setOverview(overviewBody.data ?? {});
+      if (scansRes.ok) setSeries(scansBody.data ?? []);
+      setPageReady(true);
+    }, 'Loading analytics…');
+  }, [planLoading, withLoading, appFetch]);
+
+  if (planLoading || !pageReady) return null;
 
   return (
     <div className="p-4 md:p-8">
       <h1 className="font-display text-2xl font-bold">Analytics</h1>
+      {isFree && (
+        <p className="mt-1 text-sm text-text-muted">
+          Free plan: last {plan === 'free' ? '7' : ''} days of data shown
+        </p>
+      )}
 
       <div className="mt-6 grid gap-4 sm:grid-cols-3">
         <Card>

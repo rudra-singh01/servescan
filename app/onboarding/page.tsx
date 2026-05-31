@@ -10,11 +10,13 @@ import { MENU_TEMPLATES } from '@/lib/constants';
 import { toast } from 'sonner';
 import confetti from 'canvas-confetti';
 import Image from 'next/image';
+import { useLoading } from '@/components/providers/loading-provider';
 
 const WIZARD_KEY = 'scanserve_onboarding';
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const { withLoading } = useLoading();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -61,53 +63,61 @@ export default function OnboardingPage() {
     }
 
     setLoading(true);
-    const res = await fetch('/api/v1/onboarding/tenant', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: form.name,
-        phone: form.phone,
-        city: form.city,
-        cuisineTypes: form.cuisineTypes,
-      }),
-    });
+    const ok = await withLoading(async () => {
+      const res = await fetch('/api/v1/onboarding/tenant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          phone: form.phone,
+          city: form.city,
+          cuisineTypes: form.cuisineTypes,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        toast.error(err?.error?.message || 'Something went wrong. Please try again');
+        return false;
+      }
+      return true;
+    }, 'Setting up your restaurant…');
     setLoading(false);
-    if (!res.ok) {
-      const err = await res.json();
-      const errorMsg = err?.error?.message || 'Something went wrong. Please try again';
-      toast.error(errorMsg);
-      return;
-    }
-    setStep(2);
+    if (ok) setStep(2);
   };
 
   const createMenu = async () => {
     setLoading(true);
-    const res = await fetch('/api/v1/onboarding/menu', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ template: form.template }),
-    });
+    const menuId = await withLoading(async () => {
+      const res = await fetch('/api/v1/onboarding/menu', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ template: form.template }),
+      });
+      if (!res.ok) {
+        toast.error('Could not create menu');
+        return null;
+      }
+      const { data: menu } = await res.json();
+      return menu.id as string;
+    }, 'Creating your menu…');
     setLoading(false);
-    if (!res.ok) {
-      toast.error('Could not create menu');
-      return;
-    }
-    const { data: menu } = await res.json();
+    if (!menuId) return;
     setStep(3);
-    await generateQr(menu.id);
+    await generateQr(menuId);
   };
 
   const generateQr = async (menuId: string) => {
-    const res = await fetch('/api/v1/qr/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ menuId, baseUrl: window.location.origin }),
-    });
-    if (res.ok) {
-      const { data } = await res.json();
-      setQrData(data);
-    }
+    await withLoading(async () => {
+      const res = await fetch('/api/v1/qr/generate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ menuId, baseUrl: window.location.origin }),
+      });
+      if (res.ok) {
+        const { data } = await res.json();
+        setQrData(data);
+      }
+    }, 'Generating QR code…');
   };
 
   const finish = () => {

@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatINR } from '@/lib/utils/format';
-import { formatDate } from '@/lib/utils/format';
+import { formatINR, formatDate } from '@/lib/utils/format';
+import { useLoading } from '@/components/providers/loading-provider';
+import { usePlan, usePlanGate } from '@/components/providers/plan-provider';
 
 type Order = {
   id: string;
@@ -18,28 +19,46 @@ type Order = {
 const STATUSES = ['pending', 'confirmed', 'preparing', 'ready', 'completed'] as const;
 
 export default function OrdersPage() {
+  usePlanGate('tableOrdering');
+  const { withLoading } = useLoading();
+  const { planLoading, appFetch } = usePlan();
   const [orders, setOrders] = useState<Order[]>([]);
+  const [pageReady, setPageReady] = useState(false);
 
-  const load = () => {
-    fetch('/api/v1/orders')
-      .then((r) => r.json())
-      .then((d) => setOrders(d.data ?? []));
-  };
+  const load = useCallback(
+    async (showLoader = false) => {
+      const fetchOrders = async () => {
+        const res = await appFetch('/api/v1/orders', undefined, { loading: false });
+        const body = await res.json();
+        if (res.ok) setOrders(body.data ?? []);
+      };
+
+      if (showLoader) {
+        await withLoading(fetchOrders, 'Loading orders…');
+      } else {
+        await fetchOrders();
+      }
+    },
+    [appFetch, withLoading],
+  );
 
   useEffect(() => {
-    load();
-    const interval = setInterval(load, 30000);
+    if (planLoading) return;
+    load(true).then(() => setPageReady(true));
+    const interval = setInterval(() => load(false), 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [planLoading, load]);
 
   const updateStatus = async (id: string, status: string) => {
-    await fetch(`/api/v1/orders/${id}/status`, {
+    await appFetch(`/api/v1/orders/${id}/status`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status }),
-    });
-    load();
+    }, { loading: false });
+    load(false);
   };
+
+  if (planLoading || !pageReady) return null;
 
   return (
     <div className="p-4 md:p-8">

@@ -6,58 +6,52 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import Link from 'next/link';
 import { MenuEditor, type EditorCategory } from '@/components/menu/menu-editor';
-import type { Plan } from '@/lib/constants';
+import { useLoading } from '@/components/providers/loading-provider';
+import { usePlan } from '@/components/providers/plan-provider';
 
 export default function MenuEditorPage() {
   const { menuId } = useParams<{ menuId: string }>();
+  const { withLoading } = useLoading();
+  const { planLoading, appFetch } = usePlan();
   const [menuName, setMenuName] = useState('');
   const [categories, setCategories] = useState<EditorCategory[]>([]);
-  const [plan, setPlan] = useState<Plan>('free');
-  const [loading, setLoading] = useState(true);
+  const [pageReady, setPageReady] = useState(false);
 
   const loadMenu = useCallback(async () => {
-    const [menuRes, subRes] = await Promise.all([
-      fetch(`/api/v1/menus/${menuId}`),
-      fetch('/api/v1/billing/subscription'),
-    ]);
-
-    if (menuRes.ok) {
-      const { data } = await menuRes.json();
-      setMenuName(data.name);
-      setCategories(
-        data.categories.map((c: EditorCategory) => ({
-          id: c.id,
-          name: c.name,
-          items: c.items.map((i: EditorCategory['items'][0]) => ({
-            id: i.id,
-            name: i.name,
-            price: i.price,
-            imageUrl: i.imageUrl,
-            isAvailable: i.isAvailable,
-            isVeg: i.isVeg,
+    await withLoading(async () => {
+      const menuRes = await appFetch(`/api/v1/menus/${menuId}`, undefined, { loading: false });
+      if (menuRes.ok) {
+        const { data } = await menuRes.json();
+        setMenuName(data.name);
+        setCategories(
+          data.categories.map((c: EditorCategory) => ({
+            id: c.id,
+            name: c.name,
+            items: c.items.map((i: EditorCategory['items'][0]) => ({
+              id: i.id,
+              name: i.name,
+              price: i.price,
+              imageUrl: i.imageUrl,
+              isAvailable: i.isAvailable,
+              isVeg: i.isVeg,
+            })),
           })),
-        })),
-      );
-    }
-
-    if (subRes.ok) {
-      const { data } = await subRes.json();
-      setPlan((data?.tenant?.plan as Plan) ?? 'free');
-    }
-
-    setLoading(false);
-  }, [menuId]);
+        );
+      }
+      setPageReady(true);
+    }, 'Loading menu…');
+  }, [menuId, withLoading, appFetch]);
 
   useEffect(() => {
-    loadMenu();
-  }, [loadMenu]);
+    if (!planLoading) loadMenu();
+  }, [planLoading, loadMenu]);
 
   const activateMenu = async () => {
-    const res = await fetch(`/api/v1/menus/${menuId}/activate`, { method: 'POST' });
+    const res = await appFetch(`/api/v1/menus/${menuId}/activate`, { method: 'POST' });
     if (res.ok) {
       toast.success('Menu published — guests can view it now!');
       loadMenu();
-    } else {
+    } else if (res.status !== 402) {
       const err = await res.json();
       toast.error(
         typeof err.error === 'object' && err.error?.message
@@ -67,8 +61,8 @@ export default function MenuEditorPage() {
     }
   };
 
-  if (loading) {
-    return <div className="p-8 text-center text-text-muted">Loading...</div>;
+  if (planLoading || !pageReady) {
+    return null;
   }
 
   return (
@@ -86,7 +80,7 @@ export default function MenuEditorPage() {
       </div>
 
       <div className="mt-6">
-        <MenuEditor menuId={menuId} categories={categories} plan={plan} onRefresh={loadMenu} />
+        <MenuEditor menuId={menuId} categories={categories} onRefresh={loadMenu} />
       </div>
     </div>
   );

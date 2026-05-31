@@ -9,10 +9,9 @@ import { ItemImage } from '@/components/menu/item-image';
 import { formatINR } from '@/lib/utils/format';
 import { canUploadItemImages } from '@/lib/constants/menu';
 import { PLAN_LIMITS } from '@/lib/razorpay/plans';
-import type { Plan } from '@/lib/constants';
+import { usePlan } from '@/components/providers/plan-provider';
 import { toast } from 'sonner';
 import { Plus, Trash2, ImageIcon } from 'lucide-react';
-import Link from 'next/link';
 
 export type EditorItem = {
   id: string;
@@ -32,11 +31,11 @@ export type EditorCategory = {
 type Props = {
   menuId: string;
   categories: EditorCategory[];
-  plan: Plan;
   onRefresh: () => void;
 };
 
-export function MenuEditor({ menuId, categories, plan, onRefresh }: Props) {
+export function MenuEditor({ menuId, categories, onRefresh }: Props) {
+  const { plan, guardNumericLimit, appFetch } = usePlan();
   const limits = PLAN_LIMITS[plan];
   const totalItems = categories.reduce((n, c) => n + c.items.length, 0);
   const allowImages = canUploadItemImages(plan);
@@ -57,35 +56,22 @@ export function MenuEditor({ menuId, categories, plan, onRefresh }: Props) {
     }));
   };
 
-  const handlePlanError = async (res: Response) => {
-    const err = await res.json();
-    if (err.error?.code === 'plan_limit_exceeded') {
-      toast.error(`Plan limit reached (max ${err.error.max}). Upgrade your plan.`, {
-        action: { label: 'Billing', onClick: () => (window.location.href = '/settings/billing') },
-      });
-      return true;
-    }
-    return false;
-  };
-
   const addCategory = async () => {
     if (!newCategoryName.trim()) {
       toast.error('Enter a category name');
       return;
     }
-    if (categories.length >= limits.categories) {
-      toast.error(`Your plan allows up to ${limits.categories} categories`);
-      return;
-    }
+    if (guardNumericLimit('categories', categories.length)) return;
+
     setAddingCategory(true);
-    const res = await fetch(`/api/v1/menus/${menuId}/categories`, {
+    const res = await appFetch(`/api/v1/menus/${menuId}/categories`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: newCategoryName.trim() }),
     });
     setAddingCategory(false);
     if (!res.ok) {
-      if (!(await handlePlanError(res))) toast.error('Could not add category');
+      if (res.status !== 402) toast.error('Could not add category');
       return;
     }
     setNewCategoryName('');
@@ -99,17 +85,15 @@ export function MenuEditor({ menuId, categories, plan, onRefresh }: Props) {
       toast.error('Item name and price are required');
       return;
     }
-    if (totalItems >= limits.itemsPerMenu) {
-      toast.error(`Your plan allows up to ${limits.itemsPerMenu} items per menu`);
-      return;
-    }
+    if (guardNumericLimit('itemsPerMenu', totalItems)) return;
+
     const price = parseFloat(draft.price);
     if (Number.isNaN(price) || price < 0) {
       toast.error('Enter a valid price');
       return;
     }
 
-    const res = await fetch(`/api/v1/categories/${categoryId}/items`, {
+    const res = await appFetch(`/api/v1/categories/${categoryId}/items`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -120,7 +104,7 @@ export function MenuEditor({ menuId, categories, plan, onRefresh }: Props) {
     });
 
     if (!res.ok) {
-      if (!(await handlePlanError(res))) toast.error('Could not add item');
+      if (res.status !== 402) toast.error('Could not add item');
       return;
     }
     setDraft(categoryId, { name: '', price: '', isVeg: 'veg' });
@@ -130,23 +114,23 @@ export function MenuEditor({ menuId, categories, plan, onRefresh }: Props) {
 
   const deleteItem = async (itemId: string) => {
     if (!confirm('Delete this item?')) return;
-    const res = await fetch(`/api/v1/items/${itemId}`, { method: 'DELETE' });
+    const res = await appFetch(`/api/v1/items/${itemId}`, { method: 'DELETE' });
     if (res.ok) {
       toast.success('Item deleted');
       onRefresh();
     } else {
-      toast.error('Delete fail');
+      toast.error('Delete failed');
     }
   };
 
   const toggleAvailability = async (itemId: string, isAvailable: boolean) => {
-    const res = await fetch(`/api/v1/items/${itemId}/availability`, {
+    const res = await appFetch(`/api/v1/items/${itemId}/availability`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ isAvailable }),
-    });
+    }, { loading: false });
     if (res.ok) onRefresh();
-    else toast.error('Update fail');
+    else toast.error('Update failed');
   };
 
   return (
@@ -156,12 +140,14 @@ export function MenuEditor({ menuId, categories, plan, onRefresh }: Props) {
         <span className="font-medium text-text-primary">
           {totalItems}/{limits.itemsPerMenu === Infinity ? '∞' : limits.itemsPerMenu} items
         </span>
-        {!allowImages && (
-          <span className="ml-2 text-brand">· Free plan: default image (upload Pro+)</span>
+        {plan === 'free' && (
+          <span className="ml-2 text-brand">· Free plan: default image only</span>
+        )}
+        {!allowImages && plan !== 'free' && (
+          <span className="ml-2 text-brand">· Upgrade for custom photos</span>
         )}
       </p>
 
-      {/* Add category */}
       <div className="rounded-lg border border-dashed border-border bg-surface-alt p-4">
         <Label className="text-sm font-medium">New category</Label>
         <div className="mt-2 flex flex-col gap-2 sm:flex-row">
@@ -222,7 +208,6 @@ export function MenuEditor({ menuId, categories, plan, onRefresh }: Props) {
             ))}
           </div>
 
-          {/* Add item form */}
           <div className="mt-4 rounded-lg bg-surface-alt p-3 space-y-3">
             <p className="text-sm font-medium">Add item</p>
             <div className="grid gap-2 sm:grid-cols-2">
