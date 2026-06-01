@@ -6,11 +6,17 @@ import { db } from '@/lib/db';
 import { categories } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { ValidationError, NotFoundError } from '@/lib/api/errors';
+import { assertHindiMenu } from '@/lib/plan/hindi-menu';
+import { normalizePlan } from '@/lib/plan/normalize';
 
 export const POST = withAuth(async (req, { tenant }, params) => {
   const body = await req.json();
   const parsed = itemCreateSchema.safeParse(body);
   if (!parsed.success) throw new ValidationError('Invalid input', parsed.error.flatten());
+
+  if (parsed.data.nameHi) {
+    assertHindiMenu(normalizePlan(tenant.plan));
+  }
 
   const [cat] = await db!
     .select()

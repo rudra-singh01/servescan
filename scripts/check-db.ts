@@ -7,7 +7,7 @@ import postgres from 'postgres';
 config({ path: '.env.local' });
 
 async function main() {
-  const url = process.env.DATABASE_URL_DIRECT || process.env.DATABASE_URL;
+  const url = process.env.DATABASE_URL || process.env.DATABASE_URL_DIRECT;
 
   if (!url) {
     console.error('❌ DATABASE_URL_DIRECT / DATABASE_URL missing in .env.local');

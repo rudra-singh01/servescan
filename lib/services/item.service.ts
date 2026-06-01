@@ -113,7 +113,7 @@ export async function createCategory(
   menuId: string,
   tenantId: string,
   plan: Plan,
-  input: { name: string; nameHi?: string; description?: string },
+  input: { name: string; nameHi?: string | null; description?: string },
 ) {
   const existing = await db!
     .select({ id: categories.id })

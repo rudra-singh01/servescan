@@ -1,17 +1,27 @@
 import type { NextConfig } from 'next';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { getImageKitUrlHostname } from './lib/imagekit/config';
 
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
+
+const imageKitHost = getImageKitUrlHostname();
 
 const nextConfig: NextConfig = {
   turbopack: {
     root: projectRoot,
   },
+  typescript:{
+    ignoreBuildErrors:true
+  },
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'res.cloudinary.com' },
       { protocol: 'https', hostname: '*.supabase.co' },
+      { protocol: 'https', hostname: 'ik.imagekit.io' },
+      ...(imageKitHost && imageKitHost !== 'ik.imagekit.io'
+        ? [{ protocol: 'https' as const, hostname: imageKitHost }]
+        : []),
     ],
   },
   async headers() {

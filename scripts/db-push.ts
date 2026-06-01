@@ -11,9 +11,10 @@ import path from 'path';
 config({ path: '.env.local' });
 
 function getDatabaseUrl(): string {
-  const url = process.env.DATABASE_URL_DIRECT || process.env.DATABASE_URL;
+  // Pooler (DATABASE_URL) is more reliable locally; direct host often fails DNS on Windows
+  const url = process.env.DATABASE_URL || process.env.DATABASE_URL_DIRECT;
   if (!url) {
-    console.error('❌ DATABASE_URL_DIRECT / DATABASE_URL missing in .env.local');
+    console.error('❌ DATABASE_URL / DATABASE_URL_DIRECT missing in .env.local');
     process.exit(1);
   }
   return url;

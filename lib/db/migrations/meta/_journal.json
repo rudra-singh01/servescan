@@ -15,6 +15,13 @@
       "when": 1780126632169,
       "tag": "0001_nasty_justin_hammer",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780200000000,
+      "tag": "0002_plan_payments_cashfree",
+      "breakpoints": true
     }
   ]
 }

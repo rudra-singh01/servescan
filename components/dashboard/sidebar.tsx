@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils/cn';
 import { usePlan } from '@/components/providers/plan-provider';
+import { LogoutButton } from '@/components/auth/logout-button';
 
 const nav = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -41,22 +42,27 @@ export function DashboardSidebar() {
             </span>
           )}
         </div>
-        <nav className="space-y-1 px-2">
-          {nav.map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
-                pathname.startsWith(href)
-                  ? 'bg-brand-light text-brand-dark font-medium'
-                  : 'text-text-muted hover:bg-surface-alt',
-              )}
-            >
-              <Icon className="h-4 w-4" />
-              {label}
-            </Link>
-          ))}
+        <nav className="flex flex-col px-2" style={{ minHeight: 'calc(100vh - 4rem)' }}>
+          <div className="flex-1 space-y-1">
+            {nav.map(({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors',
+                  pathname.startsWith(href)
+                    ? 'bg-brand-light text-brand-dark font-medium'
+                    : 'text-text-muted hover:bg-surface-alt',
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </Link>
+            ))}
+          </div>
+          <div className="border-t border-border py-3">
+            <LogoutButton variant="ghost" className="w-full justify-start gap-3 px-3" />
+          </div>
         </nav>
       </aside>
 

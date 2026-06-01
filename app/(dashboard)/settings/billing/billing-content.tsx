@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatINR } from '@/lib/utils/format';
 import { PLAN_LIMITS, PLAN_PRICES } from '@/lib/razorpay/plans';
-import type { Plan } from '@/lib/constants';
 import { Check } from 'lucide-react';
 import { usePlan } from '@/components/providers/plan-provider';
+import { CashfreeCheckoutButton } from '@/components/billing/cashfree-checkout-button';
+import type { Plan } from '@/lib/constants';
 
 const PLAN_ORDER: Plan[] = ['free', 'starter', 'pro', 'business'];
 
@@ -46,7 +47,7 @@ export default function BillingPageContent() {
     <div className="max-w-5xl">
       <h1 className="font-display text-2xl font-bold">Billing & Plans</h1>
       <p className="mt-1 text-text-muted">
-        Manage your plan — free includes 1 menu, 20 items, and default images
+        Manage your plan — payments are processed securely via Cashfree
       </p>
 
       {isPlanLimitRedirect && !planLoading && (
@@ -119,9 +120,12 @@ export default function BillingPageContent() {
                   </li>
                 </ul>
                 {planId !== 'free' && !isCurrent && (
-                  <Button className="w-full" size="sm" variant={planId === 'pro' ? 'default' : 'outline'}>
-                    Upgrade
-                  </Button>
+                  <CashfreeCheckoutButton
+                    plan={planId as Exclude<Plan, 'free'>}
+                    className="w-full"
+                    variant={planId === 'pro' ? 'default' : 'outline'}
+                    label="Pay with Cashfree"
+                  />
                 )}
                 {planId === 'free' && !isCurrent && (
                   <Button className="w-full" size="sm" variant="outline" disabled>

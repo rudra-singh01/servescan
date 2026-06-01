@@ -269,6 +269,29 @@ export const scans = pgTable(
   ],
 );
 
+/** Cashfree (or other PG) checkout attempts for plan upgrades. */
+export const planPayments = pgTable(
+  'plan_payments',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    tenantId: uuid('tenant_id')
+      .notNull()
+      .references(() => tenants.id, { onDelete: 'cascade' }),
+    plan: text('plan').notNull(),
+    orderId: text('order_id').notNull().unique(),
+    cashfreeOrderId: text('cashfree_order_id'),
+    amount: numeric('amount', { precision: 10, scale: 2 }).notNull(),
+    currency: text('currency').default('INR').notNull(),
+    status: text('status').notNull().default('pending'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    index('plan_payments_tenant_idx').on(t.tenantId),
+    index('plan_payments_order_idx').on(t.orderId),
+  ],
+);
+
 export const subscriptions = pgTable(
   'subscriptions',
   {
@@ -280,6 +303,7 @@ export const subscriptions = pgTable(
     status: text('status').notNull(),
     razorpaySubId: text('razorpay_sub_id').unique(),
     razorpayPlanId: text('razorpay_plan_id'),
+    cashfreeOrderId: text('cashfree_order_id'),
     currentPeriodStart: timestamp('current_period_start', { withTimezone: true }),
     currentPeriodEnd: timestamp('current_period_end', { withTimezone: true }),
     cancelAtPeriodEnd: boolean('cancel_at_period_end').default(false),
@@ -365,3 +389,4 @@ export type Category = typeof categories.$inferSelect;
 export type Item = typeof items.$inferSelect;
 export type Order = typeof orders.$inferSelect;
 export type QrCode = typeof qrCodes.$inferSelect;
+export type PlanPayment = typeof planPayments.$inferSelect;

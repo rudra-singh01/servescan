@@ -35,8 +35,9 @@
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-display: var(--font-syne);
-  --font-sans: var(--font-dm-sans);
+  --font-sans: var(--font-dm-sans), var(--font-devanagari), system-ui, sans-serif;
   --font-mono: var(--font-jetbrains);
+  --font-hindi: var(--font-devanagari), var(--font-dm-sans), system-ui, sans-serif;
 }
 
 body {

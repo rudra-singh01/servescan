@@ -23,7 +23,7 @@ export const razorpayWebhook = inngest.createFunction(
       const tenantId = sub?.notes?.tenant_id;
       const plan = sub?.notes?.plan ?? 'starter';
       if (tenantId) {
-        await billing.activatePlan(tenantId, plan, sub?.id);
+        await billing.activatePlan(tenantId, plan, { razorpaySubId: sub?.id });
       }
     }
 

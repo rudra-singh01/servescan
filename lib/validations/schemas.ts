@@ -48,14 +48,14 @@ export const onboardingMenuSchema = z.object({
 
 export const categoryCreateSchema = z.object({
   name: z.string().min(1).max(100),
-  nameHi: z.string().max(100).optional(),
+  nameHi: z.string().max(100).nullable().optional(),
   description: z.string().max(500).optional(),
   imageUrl: z.string().url().optional(),
 });
 
 export const itemCreateSchema = z.object({
   name: z.string().min(1).max(120),
-  nameHi: z.string().max(120).optional(),
+  nameHi: z.string().max(120).nullable().optional(),
   description: z.string().max(1000).optional(),
   price: z.coerce.number().min(0),
   comparePrice: z.coerce.number().min(0).optional(),
@@ -65,7 +65,7 @@ export const itemCreateSchema = z.object({
   isSpicy: z.boolean().default(false),
   tags: z.array(z.string()).default([]),
   allergens: z.array(z.string()).default([]),
-  imageUrl: z.string().url().optional(),
+  imageUrl: z.string().url().nullable().optional(),
   customisations: z.array(z.record(z.unknown())).default([]),
 });
 
@@ -75,6 +75,10 @@ export const reorderSchema = z.array(
     sortOrder: z.number().int().min(0),
   }),
 );
+
+export const billingCheckoutSchema = z.object({
+  plan: z.enum(['starter', 'pro', 'business']),
+});
 
 export const availabilitySchema = z.object({
   isAvailable: z.boolean(),

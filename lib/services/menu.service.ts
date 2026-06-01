@@ -169,8 +169,22 @@ export async function getPublicMenu(tenantSlug: string, preview = false) {
   const activeCategories = details.categories
     .filter((c) => c.isActive)
     .map((c) => ({
-      ...c,
-      items: c.items.filter((i) => preview || i.isAvailable),
+      id: c.id,
+      name: c.name,
+      nameHi: c.nameHi ?? null,
+      items: c.items
+        .filter((i) => preview || i.isAvailable)
+        .map((i) => ({
+          id: i.id,
+          name: i.name,
+          nameHi: i.nameHi ?? null,
+          description: i.description,
+          price: i.price,
+          imageUrl: i.imageUrl,
+          isVeg: i.isVeg,
+          isAvailable: i.isAvailable,
+          isFeatured: i.isFeatured,
+        })),
     }))
     .filter((c) => c.items.length > 0);
 
